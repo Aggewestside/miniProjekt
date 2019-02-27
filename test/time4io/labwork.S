@@ -11,7 +11,7 @@
  .global delay
  .global time2string
  .global hexasc
- 
+ .global enable_interrupt
  
  .data
  .text
@@ -117,4 +117,10 @@ exittime:
 
 	POP 	$ra
 	jr 		$ra
+	
+enable_interrupt:
+	
+	ei
+	jal $ra
+	nop
 	
