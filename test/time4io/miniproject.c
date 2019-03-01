@@ -18,7 +18,7 @@
 #include <math.h>
 
 int solo_score = -1;
-int score[3] = {0,0,0};
+int hiScore[3] = {0,0,0};
 int game_mode = 0;
 int tickcount = 128;
 volatile int * trise;
@@ -27,8 +27,8 @@ int resetcount = 0;
 int i = 0;
 volatile int cd = 0;
 int wait = 0;
-int cdMAX = 100;
-int antalclicks = 0;
+int cdMAX = 100; 		// längsta delayen
+int antalclicks = 20; 	//kontrollerar start hastigheten
 int player_one = 0;
 int player_two = 0;
 int score_player_one = 0;
@@ -70,6 +70,23 @@ void labinit( void )
   return;
 }
 
+void addScore(int *a)
+{		
+	for(i = 1; i >= 0; i--)
+	{
+		if(solo_score > a[i])
+		{
+			a[i+1] = a[i];
+		}
+		else
+		{
+			break;
+		}
+	}
+	hiScore[i+1] = solo_score;
+	display_string(3, "New Top Score!");
+}
+
 void bristning_left_side(void)		//+1 player-mode, poäng och ny runda
 {
 	if(game_mode==1)
@@ -79,6 +96,12 @@ void bristning_left_side(void)		//+1 player-mode, poäng och ny runda
 		display_string(2,"Final score:"); ////////////
 		display_string(3,itoaconv(solo_score));
 		display_update();
+		
+		while(cd<150)
+		{
+			wait = 1;
+		}
+		wait = 0;
 	}
 	
 	if(game_mode==2)
@@ -86,6 +109,36 @@ void bristning_left_side(void)		//+1 player-mode, poäng och ny runda
 		score_player_two++;
 		if(score_player_two == 3)
 		{
+			tickcount=255;
+			PORTE=tickcount;
+			if((score_player_one == 0) && (score_player_two == 3))
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "  O  O  _   __O");
+				display_string(2, "  O  O        O");
+				display_string(3, "  OOOO     OOOO");
+			}
+			if((score_player_one == 1) && (score_player_two == 3))
+			{
+				display_string(0, "   OO      OOOO");
+				display_string(1, "  OOO   _   __O");
+				display_string(2, "   OO         O");
+				display_string(3, "  OOOO     OOOO");
+			}
+			if((score_player_one == 2) && (score_player_two == 3))
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "    oO  _   __O");
+				display_string(2, "  O           O");
+				display_string(3, "  OOOO     OOOO");
+			}
+			display_update();
+			while(cd<150)
+			{
+				wait = 1;
+			}
+			wait = 0;
+			
 			display_string(0,"CONGRATULATIONS");
 			display_string(1,"");
 			display_string(2,"  PLAYER TWO");
@@ -122,18 +175,27 @@ void bristning_left_side(void)		//+1 player-mode, poäng och ny runda
 	}
 	if(game_mode == 1)				// 1 player highscore
 	{
-		for (i = 0; i < 3; i++)
-		{
-			if (solo_score > score[i])
+		if(solo_score > hiScore[2])
+			addScore(hiScore);
+		display_string(0, "HIGHSCORE");
+		display_string(1, itoaconv(hiScore[0]));
+		display_string(2, itoaconv(hiScore[1]));
+		display_string(3, itoaconv(hiScore[2]));
+		
+		display_update();
+	
+		while(cd<150)
 			{
-				score[i] = solo_score;
-				break;
+				wait = 1;
 			}
-		}
+			wait = 0;
+	
 		game_mode = 0;
 	}
 	if((game_mode == 2) && (score_player_one == 3 || score_player_two == 3))
 	{
+		
+		
 		score_player_one = 0;
 		score_player_two = 0;
 		game_mode = 0;
@@ -151,6 +213,38 @@ void bristning_right_side(void)		//poäng och ny runda
 	score_player_one++;
 	if(score_player_one == 3)
 	{
+		tickcount=255;
+		PORTE=tickcount;
+		if((score_player_one == 3) && (score_player_two == 0))
+		{
+			display_string(0, "  OOOO     OOOO");
+			display_string(1, "   __O  _  O  O");
+			display_string(2, "     O     O  O");
+			display_string(3, "  OOOO     OOOO");
+		}
+		
+		if((score_player_one == 3) && (score_player_two == 1))
+		{
+			display_string(0, "  OOOO      OO ");
+			display_string(1, "   __O  _  OOO ");
+			display_string(2, "     O      OO ");
+			display_string(3, "  OOOO     OOOO");
+		}
+		
+		if((score_player_one == 3) && (score_player_two == 2))
+		{
+			display_string(0, "  OOOO     OOOO");
+			display_string(1, "   __O  _    oO");
+			display_string(2, "     O     O   ");
+			display_string(3, "  OOOO     OOOO");
+		}
+		display_update();
+		while(cd<150)
+			{
+				wait = 1;
+			}
+			wait = 0;
+		
 		display_string(0,"CONGRATULATIONS");
 		display_string(1,"");
 		display_string(2,"  PLAYER ONE");
@@ -351,12 +445,77 @@ void labwork( void )
 		}
 		while(1)				
 		{
+			if((score_player_one == 0) && (score_player_two == 0)) 		// visa ny score
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "  O  O  _  O  O");
+				display_string(2, "  O  O     O  O");
+				display_string(3, "  OOOO     OOOO");
+			}
 			
+			if((score_player_one == 0) && (score_player_two == 1))
+			{
+				display_string(0, "  OOOO      OO ");
+				display_string(1, "  O  O  _  OOO ");
+				display_string(2, "  O  O      OO ");
+				display_string(3, "  OOOO     OOOO");
+			}
 			
-			display_string(0, "OOOO   OOOO");
-			display_string(1, "O  O _ O  O");
-			display_string(2, "O  O   O  O");
-			display_string(3, "OOOO   OOOO");
+			if((score_player_one == 0) && (score_player_two == 2))
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "  O  O  _    oO");
+				display_string(2, "  O  O     O   ");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 1) && (score_player_two == 0))
+			{
+				display_string(0, "   OO      OOOO");
+				display_string(1, "  OOO   _  O  O");
+				display_string(2, "   OO      O  O");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 1) && (score_player_two == 1))
+			{
+				display_string(0, "   OO       OO ");
+				display_string(1, "  OOO   _  OOO ");
+				display_string(2, "   OO       OO ");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 1) && (score_player_two == 2))
+			{
+				display_string(0, "   OO      OOOO");
+				display_string(1, "  OOO   _    oO");
+				display_string(2, "   OO      O   ");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 2) && (score_player_two == 0))
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "    oO  _  O  O");
+				display_string(2, "  O        O  O");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 2) && (score_player_two == 1))
+			{
+				display_string(0, "  OOOO      OO ");
+				display_string(1, "    oO  _  OOO ");
+				display_string(2, "  O         OO ");
+				display_string(3, "  OOOO     OOOO");
+			}
+			
+			if((score_player_one == 2) && (score_player_two == 2))
+			{
+				display_string(0, "  OOOO     OOOO");
+				display_string(1, "    oO  _    oO");
+				display_string(2, "  O        O   ");
+				display_string(3, "  OOOO     OOOO");
+			}
 			display_update();			
 			
 			PORTE = tickcount;
